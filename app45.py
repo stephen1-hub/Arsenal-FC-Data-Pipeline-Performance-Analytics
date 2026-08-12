@@ -422,5 +422,6 @@ st.divider()
 
 st.caption(
     "Arsenal FC Data Pipeline & Performance Analytics | "
-    "Football Analytics Case Study | " Created by Stephen Yaw Ayamah"
+    "Football Analytics Case Study | "
+    "Created by Stephen Yaw Ayamah"
 )
