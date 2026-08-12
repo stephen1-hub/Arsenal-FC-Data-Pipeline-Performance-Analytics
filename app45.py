@@ -2,10 +2,10 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
-
 # --------------------------------------------------
 # PAGE CONFIG
 # --------------------------------------------------
+
 st.set_page_config(
     page_title="Arsenal FC Analytics",
     page_icon="⚽",
@@ -13,17 +13,18 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-
 # --------------------------------------------------
 # DATA PATH
 # --------------------------------------------------
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data" / "raw"
 
+# app45.py is located at the repository root
+BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data" / "raw"
 
 # --------------------------------------------------
 # LOAD DATA
 # --------------------------------------------------
+
 @st.cache_data
 def load_data():
 
@@ -60,20 +61,20 @@ def load_data():
 
 match_df, players_df, goalkeepers_df = load_data()
 
-
 # --------------------------------------------------
 # SIDEBAR
 # --------------------------------------------------
+
 st.sidebar.title("⚽ Arsenal FC Analytics")
 
 st.sidebar.caption(
     "2017/18 – 2022/23"
 )
 
-
 # --------------------------------------------------
 # PAGE HEADER
 # --------------------------------------------------
+
 st.title(
     "⚽ Arsenal FC Data Pipeline & Performance Analytics"
 )
@@ -85,15 +86,14 @@ st.markdown(
     """
 )
 
-
 # --------------------------------------------------
 # DATASET NOTE
 # --------------------------------------------------
+
 st.info(
     "Use the pages in the sidebar to explore the five business questions. "
     "The 2022/23 season is incomplete in the available dataset."
 )
-
 
 # ==================================================
 # MATCH PERFORMANCE CALCULATIONS
@@ -101,41 +101,40 @@ st.info(
 
 match_df = match_df.copy()
 
-
 # --------------------------------------------------
 # RESULT
 # --------------------------------------------------
+
 match_df["Result"] = match_df.apply(
     lambda r:
-        "Win"
-        if r["ArsenalScore"] > r["OpponentScore"]
-        else (
-            "Draw"
-            if r["ArsenalScore"] == r["OpponentScore"]
-            else "Loss"
-        ),
+    "Win"
+    if r["ArsenalScore"] > r["OpponentScore"]
+    else (
+        "Draw"
+        if r["ArsenalScore"] == r["OpponentScore"]
+        else "Loss"
+    ),
     axis=1,
 )
-
 
 # --------------------------------------------------
 # POINTS
 # --------------------------------------------------
+
 match_df["Points"] = match_df["Result"].map({
     "Win": 3,
     "Draw": 1,
     "Loss": 0
 })
 
-
 # --------------------------------------------------
 # GOAL DIFFERENCE
 # --------------------------------------------------
+
 match_df["GoalDifference"] = (
     match_df["ArsenalScore"]
     - match_df["OpponentScore"]
 )
-
 
 # ==================================================
 # KPI CALCULATIONS
@@ -183,46 +182,38 @@ goal_difference = (
     goals_for - goals_against
 )
 
-
 # ==================================================
 # KPI CARDS
 # ==================================================
 
 c1, c2, c3, c4, c5 = st.columns(5)
 
-
 c1.metric(
     "Matches",
     f"{total_matches:,}"
 )
-
 
 c2.metric(
     "Wins",
     f"{wins:,}"
 )
 
-
 c3.metric(
     "Win Rate",
     f"{win_rate:.1f}%"
 )
-
 
 c4.metric(
     "Points / Match",
     f"{ppm:.2f}"
 )
 
-
 c5.metric(
     "Goal Difference",
     f"{goal_difference:+,}"
 )
 
-
 st.divider()
-
 
 # ==================================================
 # DATASET OVERVIEW
@@ -230,10 +221,10 @@ st.divider()
 
 col1, col2 = st.columns(2)
 
-
 # --------------------------------------------------
 # SEASONS & DATA ASSETS
 # --------------------------------------------------
+
 with col1:
 
     st.subheader("📊 Seasons Covered")
@@ -262,10 +253,10 @@ with col1:
         f"Goalkeeper-match records: **{len(goalkeepers_df):,}** records"
     )
 
-
 # --------------------------------------------------
 # BUSINESS QUESTIONS
 # --------------------------------------------------
+
 with col2:
 
     st.subheader("🎯 Business Questions")
@@ -289,9 +280,7 @@ with col2:
         """
     )
 
-
 st.divider()
-
 
 # ==================================================
 # DASHBOARD GUIDE
@@ -309,7 +298,6 @@ st.markdown(
     with emphasis on **decision-ready metrics rather than isolated statistics**.
     """
 )
-
 
 # ==================================================
 # DATASET SUMMARY
