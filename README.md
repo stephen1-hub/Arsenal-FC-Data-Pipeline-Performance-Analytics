@@ -7,7 +7,7 @@ This project develops an end-to-end football data pipeline to collect, clean, tr
 The analysis combines three datasets:
 
 * `matches.csv` — Arsenal match-level results and match context
-* `player.csv` — player appearances, attacking, creative, defensive and progression statistics
+* `players.csv` — player appearances, attacking, creative, defensive and progression statistics
 * `goalkeepers.csv` — goalkeeper shot-stopping and distribution statistics
 
 The objective is to transform raw football data into **actionable performance insights** that could support coaching, recruitment, scouting, performance analysis and strategic decision-making.
