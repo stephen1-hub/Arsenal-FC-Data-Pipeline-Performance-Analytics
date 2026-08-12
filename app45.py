@@ -72,30 +72,26 @@ match_df, players_df, goalkeepers_df = load_data()
 
 
 # ============================================================
-# SIDEBAR
+# SIDEBAR NAVIGATION
 # ============================================================
 
 st.sidebar.title("⚽ Arsenal FC Analytics")
-
-st.sidebar.caption(
-    "2017/18 – 2022/23"
-)
+st.sidebar.caption("2017/18 – 2022/23")
 
 st.sidebar.divider()
 
-st.sidebar.markdown(
-    """
-    ### Dashboard Sections
-
-    📅 Season Performance  
-    🧑‍💼 Coach Analysis  
-    🏟️ Opponent Analysis  
-    👤 Player Analytics  
-    🧤 Goalkeeper Analytics  
-    🔄 Coaching Eras
-    """
+page = st.sidebar.radio(
+    "Navigate to:",
+    [
+        "🏠 Overview",
+        "📅 Season Performance",
+        "🧑‍💼 Coach Analysis",
+        "🏟️ Opponent Analysis",
+        "👤 Player Analytics",
+        "🧤 Goalkeeper Analytics",
+        "🔄 Coaching Eras",
+    ]
 )
-
 
 # ============================================================
 # PAGE HEADER
