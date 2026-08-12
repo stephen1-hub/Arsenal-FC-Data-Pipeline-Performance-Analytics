@@ -1,73 +1,15 @@
-ArsenalFC-Data-Pipeline-Project/
+Arsenal-FC-Data-Pipeline-Performance-Analytics/
 │
-├── data/
-│   ├── raw/
-│   │   ├── matches.csv
-│   │   ├── player.csv
-│   │   └── goalkeepers.csv
-│   │
-│   └── processed/
-│       ├── matches_clean.csv
-│       ├── players_clean.csv
-│       ├── goalkeepers_clean.csv
-│       ├── season_summary.csv
-│       ├── coach_summary.csv
-│       ├── opponent_summary.csv
-│       └── player_summary.csv
-│
-├── notebooks/
-│   ├── 01_data_cleaning.ipynb
-│   ├── 02_season_performance.ipynb
-│   ├── 03_coach_analysis.ipynb
-│   ├── 04_opponent_analysis.ipynb
-│   ├── 05_player_analysis.ipynb
-│   ├── 06_goalkeeper_analysis.ipynb
-│   └── 07_coaching_era_analysis.ipynb
-│
-├── src/
-│   ├── __init__.py
-│   ├── data_cleaning.py
-│   ├── data_validation.py
-│   ├── feature_engineering.py
-│   ├── match_analysis.py
-│   ├── player_analysis.py
-│   └── coach_analysis.py
-│
-├── sql/
-│   ├── 01_create_tables.sql
-│   ├── 02_load_data.sql
-│   ├── 03_season_analysis.sql
-│   ├── 04_coach_analysis.sql
-│   ├── 05_opponent_analysis.sql
-│   └── 06_player_analysis.sql
-│
-├── dashboard/
-│   ├── app45.py
-│   ├── pages/
-│   │   ├── 01_Season_Performance.py
-│   │   ├── 02_Coach_Analysis.py
-│   │   ├── 03_Opponent_Analysis.py
-│   │   ├── 04_Player_Analytics.py
-│   │   ├── 05_Goalkeeper_Analytics.py
-│   │   └── 06_Coaching_Eras.py
-│   │
-│   └── assets/
-│       └── arsenal_logo.png
-│
-├── outputs/
-│   ├── figures/
-│   │   ├── season_performance.png
-│   │   ├── coach_comparison.png
-│   │   ├── opponent_performance.png
-│   │   ├── home_away_comparison.png
-│   │   └── player_contribution.png
-│   │
-│   └── tables/
-│       ├── season_summary.csv
-│       ├── coach_summary.csv
-│       └── opponent_summary.csv
-│
+├── app45.py
+├── matches.csv
+├── players.csv
+├── goalkeepers.csv
 ├── requirements.txt
-├── .gitignore
-├── README.md
-└── LICENSE
+│
+└── pages/
+    ├── 01_Season_Performance.py
+    ├── 02_Coach_Analysis.py
+    ├── 03_Opponent_Analysis.py
+    ├── 04_Player_Analytics.py
+    ├── 05_Goalkeeper_Analytics.py
+    └── 06_Coaching_Eras.py
