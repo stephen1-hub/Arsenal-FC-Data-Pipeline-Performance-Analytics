@@ -3,34 +3,41 @@ import pandas as pd
 import plotly.express as px
 from pathlib import Path
 
-
-# --------------------------------------------------
+# ============================================================
 # PAGE CONFIG
-# --------------------------------------------------
+# ============================================================
+
 st.set_page_config(
     page_title="Coach Analysis",
     page_icon="🧑‍💼",
     layout="wide"
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # DATA PATH
-# --------------------------------------------------
-DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
+# ============================================================
 
+# This file is inside /pages
+# CSV files are located in the repository root
 
-# --------------------------------------------------
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR
+
+MATCHES_FILE = DATA_DIR / "matches.csv"
+
+# ============================================================
 # LOAD MATCH DATA
-# --------------------------------------------------
+# ============================================================
+
 @st.cache_data
 def load_matches():
 
-    match_df = pd.read_csv(
-        DATA_DIR / "matches.csv"
-    )
+    match_df = pd.read_csv(MATCHES_FILE)
 
-    # Result
+    # ========================================================
+    # RESULT
+    # ========================================================
+
     match_df["Result"] = match_df.apply(
         lambda r:
         "Win"
@@ -43,14 +50,20 @@ def load_matches():
         axis=1
     )
 
-    # Points
+    # ========================================================
+    # POINTS
+    # ========================================================
+
     match_df["Points"] = match_df["Result"].map({
         "Win": 3,
         "Draw": 1,
         "Loss": 0
     })
 
-    # Goal Difference
+    # ========================================================
+    # GOAL DIFFERENCE
+    # ========================================================
+
     match_df["GoalDifference"] = (
         match_df["ArsenalScore"]
         - match_df["OpponentScore"]
@@ -59,12 +72,16 @@ def load_matches():
     return match_df
 
 
+# ============================================================
+# LOAD DATA
+# ============================================================
+
 match_df = load_matches()
 
-
-# --------------------------------------------------
+# ============================================================
 # HEADER
-# --------------------------------------------------
+# ============================================================
+
 st.title("🧑‍💼 Coach Analysis")
 
 st.caption(
@@ -72,10 +89,22 @@ st.caption(
     "How did Arsenal perform under different coaches?"
 )
 
+# ============================================================
+# CHECK COACH COLUMN
+# ============================================================
 
-# --------------------------------------------------
+if "Coach" not in match_df.columns:
+
+    st.error(
+        "The matches.csv file does not contain a 'Coach' column."
+    )
+
+    st.stop()
+
+# ============================================================
 # COACH SUMMARY
-# --------------------------------------------------
+# ============================================================
+
 summary = (
     match_df
     .groupby("Coach")
@@ -120,10 +149,10 @@ summary = (
     .reset_index()
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # CALCULATED METRICS
-# --------------------------------------------------
+# ============================================================
+
 summary["Win_%"] = (
     summary["Wins"]
     / summary["Matches"]
@@ -145,32 +174,40 @@ summary["Goals_Conceded_Per_Match"] = (
     / summary["Matches"]
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # KPI CARDS
-# --------------------------------------------------
-best_ppm = summary.loc[summary["PPM"].idxmax()]
-best_win = summary.loc[summary["Win_%"].idxmax()]
-best_gd = summary.loc[summary["Goal_Difference"].idxmax()]
+# ============================================================
+
+best_ppm = summary.loc[
+    summary["PPM"].idxmax()
+]
+
+best_win = summary.loc[
+    summary["Win_%"].idxmax()
+]
+
+best_gd = summary.loc[
+    summary["Goal_Difference"].idxmax()
+]
 
 c1, c2, c3, c4 = st.columns(4)
 
 c1.metric(
     "Highest PPM",
     f"{best_ppm['PPM']:.2f}",
-    best_ppm["Coach"]
+    str(best_ppm["Coach"])
 )
 
 c2.metric(
     "Highest Win Rate",
     f"{best_win['Win_%']:.1f}%",
-    best_win["Coach"]
+    str(best_win["Coach"])
 )
 
 c3.metric(
     "Best Goal Difference",
     f"{best_gd['Goal_Difference']:+.0f}",
-    best_gd["Coach"]
+    str(best_gd["Coach"])
 )
 
 c4.metric(
@@ -178,14 +215,16 @@ c4.metric(
     summary["Coach"].nunique()
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # SUMMARY TABLE
-# --------------------------------------------------
+# ============================================================
+
 st.subheader("📊 Coach Performance Summary")
 
+display_summary = summary.copy()
+
 st.dataframe(
-    summary.style.format({
+    display_summary.style.format({
         "Win_%": "{:.2f}%",
         "PPM": "{:.2f}",
         "Goals_Scored_Per_Match": "{:.2f}",
@@ -194,12 +233,15 @@ st.dataframe(
     use_container_width=True
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # WIN RATE & PPM
-# --------------------------------------------------
+# ============================================================
+
 col1, col2 = st.columns(2)
 
+# ============================================================
+# WIN RATE
+# ============================================================
 
 with col1:
 
@@ -227,6 +269,9 @@ with col1:
         use_container_width=True
     )
 
+# ============================================================
+# POINTS PER MATCH
+# ============================================================
 
 with col2:
 
@@ -254,10 +299,10 @@ with col2:
         use_container_width=True
     )
 
-
-# --------------------------------------------------
+# ============================================================
 # GOALS SCORED VS CONCEDED
-# --------------------------------------------------
+# ============================================================
+
 plot_df = summary.melt(
     id_vars="Coach",
     value_vars=[
@@ -287,10 +332,10 @@ st.plotly_chart(
     use_container_width=True
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # GOAL DIFFERENCE
-# --------------------------------------------------
+# ============================================================
+
 fig = px.bar(
     summary.sort_values("Goal_Difference"),
     x="Goal_Difference",
@@ -314,10 +359,10 @@ st.plotly_chart(
     use_container_width=True
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # ANALYTICAL NOTE
-# --------------------------------------------------
+# ============================================================
+
 st.info(
     "Coach comparisons are observational rather than causal. "
     "Differences in sample size, squad quality, competition context, "
