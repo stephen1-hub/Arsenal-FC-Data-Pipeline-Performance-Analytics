@@ -93,45 +93,21 @@ Compare player contribution during the Wenger, Emery and Arteta eras to investig
 
 # 🗂️ Project Structure
 
-```text
-ArsenalFC-Data-Pipeline-Project/
+Arsenal-FC-Data-Pipeline-Performance-Analytics/
 │
-├── data/
-│   ├── raw/
-│   │   ├── matches.csv
-│   │   ├── player.csv
-│   │   └── goalkeepers.csv
-│   │
-│   └── processed/
-│       ├── clean_matches.csv
-│       ├── clean_players.csv
-│       └── clean_goalkeepers.csv
-│
-├── notebooks/
-│   ├── 01_data_cleaning.ipynb
-│   ├── 02_season_analysis.ipynb
-│   ├── 03_coach_analysis.ipynb
-│   ├── 04_opponent_analysis.ipynb
-│   ├── 05_player_analysis.ipynb
-│   └── 06_coaching_era_analysis.ipynb
-│
-├── src/
-│   ├── data_cleaning.py
-│   ├── feature_engineering.py
-│   ├── player_metrics.py
-│   └── coach_analysis.py
-│
-├── dashboard/
-│   └── app45.py
-│
-├── outputs/
-│   ├── figures/
-│   └── tables/
-│
+├── app45.py
+├── matches.csv
+├── players.csv
+├── goalkeepers.csv
 ├── requirements.txt
 ├── README.md
-└── .gitignore
-```
+│
+└── pages/
+    ├── 01_Season_Performance.py
+    ├── 02_Coach_Analysis.py
+    ├── 03_Opponent_Analysis.py
+    ├── 04_Player_Analytics.py
+    └── 05_Goalkeeper_Analytics.py
 
 ---
 
