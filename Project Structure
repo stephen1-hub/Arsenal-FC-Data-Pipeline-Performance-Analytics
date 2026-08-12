@@ -5,11 +5,11 @@ Arsenal-FC-Data-Pipeline-Performance-Analytics/
 ├── players.csv
 ├── goalkeepers.csv
 ├── requirements.txt
+├── README.md
 │
 └── pages/
     ├── 01_Season_Performance.py
     ├── 02_Coach_Analysis.py
     ├── 03_Opponent_Analysis.py
     ├── 04_Player_Analytics.py
-    ├── 05_Goalkeeper_Analytics.py
-    └── 06_Coaching_Eras.py
+    └── 05_Goalkeeper_Analytics.py
