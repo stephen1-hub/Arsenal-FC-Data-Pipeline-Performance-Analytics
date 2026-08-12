@@ -17,9 +17,9 @@ st.set_page_config(
 # DATA PATH
 # --------------------------------------------------
 
-# app45.py is located at the repository root
+# app45.py and the CSV files are in the repository root
 BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data" / "raw"
+DATA_DIR = BASE_DIR
 
 # --------------------------------------------------
 # LOAD DATA
