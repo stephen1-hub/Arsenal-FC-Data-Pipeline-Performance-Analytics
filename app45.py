@@ -59,58 +59,6 @@ def load_data():
 match_df, players_df, goalkeepers_df = load_data()
 
 # ============================================================
-# NATIVE STREAMLIT NAVIGATION
-# ============================================================
-
-pages = {
-    "⚽ Arsenal FC Analytics": [
-        st.Page(
-            "app45.py",
-            title="Overview",
-            icon="🏠",
-        ),
-    ],
-
-    "📊 Performance Analysis": [
-        st.Page(
-            "pages/01_Season_Performance.py",
-            title="Season Performance",
-            icon="📅",
-        ),
-        st.Page(
-            "pages/02_Coach_Analysis.py",
-            title="Coach Analysis",
-            icon="🧑‍💼",
-        ),
-        st.Page(
-            "pages/03_Opponent_Analysis.py",
-            title="Opponent Analysis",
-            icon="🏟️",
-        ),
-    ],
-
-    "👤 Player Analysis": [
-        st.Page(
-            "pages/04_Player_Analytics.py",
-            title="Player Analytics",
-            icon="👤",
-        ),
-        st.Page(
-            "pages/05_Goalkeeper_Analytics.py",
-            title="Goalkeeper Analytics",
-            icon="🧤",
-        ),
-        st.Page(
-            "pages/06_Coaching_Eras.py",
-            title="Coaching Eras",
-            icon="🔄",
-        ),
-    ],
-}
-
-pg = st.navigation(pages)
-
-# ============================================================
 # SIDEBAR
 # ============================================================
 
@@ -126,14 +74,13 @@ with st.sidebar:
         """
         ### 📌 Dashboard
 
-        Use the navigation above to explore:
+        Use the navigation menu above to explore:
 
-        - Season Performance
-        - Coach Analysis
-        - Opponent Analysis
-        - Player Analytics
-        - Goalkeeper Analytics
-        - Coaching Eras
+        - 📅 Season Performance
+        - 🧑‍💼 Coach Analysis
+        - 🏟️ Opponent Analysis
+        - 👤 Player Analytics
+        - 🧤 Goalkeeper Analytics
         """
     )
 
@@ -144,40 +91,39 @@ with st.sidebar:
     )
 
 # ============================================================
-# OVERVIEW PAGE
+# PAGE HEADER
 # ============================================================
 
-# IMPORTANT:
-# This section should only appear when the Overview page is selected.
+st.title(
+    "⚽ Arsenal FC Data Pipeline & Performance Analytics"
+)
 
-if pg.url_path == "app45":
+st.markdown(
+    """
+    An interactive football analytics dashboard analysing
+    Arsenal's team performance, coaching periods, opponents,
+    player contributions and goalkeeper performance.
+    """
+)
 
-    st.title(
-        "⚽ Arsenal FC Data Pipeline & Performance Analytics"
-    )
+# ============================================================
+# DATASET NOTE
+# ============================================================
 
-    st.markdown(
-        """
-        An interactive football analytics dashboard analysing
-        Arsenal's team performance, coaching periods, opponents,
-        player contributions and goalkeeper performance.
-        """
-    )
+st.info(
+    "Use the pages in the sidebar to explore the analytical "
+    "sections. The 2022/23 season is incomplete in the "
+    "available dataset."
+)
 
-    st.info(
-        "Use the navigation menu to explore the six analytical "
-        "sections. The 2022/23 season is incomplete in the "
-        "available dataset."
-    )
+# ============================================================
+# MATCH PERFORMANCE
+# ============================================================
 
-    # ========================================================
-    # MATCH PERFORMANCE
-    # ========================================================
+match_df = match_df.copy()
 
-    match_df = match_df.copy()
-
-    match_df["Result"] = match_df.apply(
-        lambda row:
+match_df["Result"] = match_df.apply(
+    lambda row:
         "Win"
         if row["ArsenalScore"] > row["OpponentScore"]
         else (
@@ -185,213 +131,207 @@ if pg.url_path == "app45":
             if row["ArsenalScore"] == row["OpponentScore"]
             else "Loss"
         ),
-        axis=1,
-    )
+    axis=1,
+)
 
-    match_df["Points"] = match_df["Result"].map(
-        {
-            "Win": 3,
-            "Draw": 1,
-            "Loss": 0,
-        }
-    )
+match_df["Points"] = match_df["Result"].map(
+    {
+        "Win": 3,
+        "Draw": 1,
+        "Loss": 0,
+    }
+)
 
-    match_df["GoalDifference"] = (
-        match_df["ArsenalScore"]
-        - match_df["OpponentScore"]
-    )
-
-    # ========================================================
-    # KPI CALCULATIONS
-    # ========================================================
-
-    total_matches = len(match_df)
-
-    wins = (
-        match_df["Result"] == "Win"
-    ).sum()
-
-    draws = (
-        match_df["Result"] == "Draw"
-    ).sum()
-
-    losses = (
-        match_df["Result"] == "Loss"
-    ).sum()
-
-    goals_for = match_df["ArsenalScore"].sum()
-
-    goals_against = match_df["OpponentScore"].sum()
-
-    total_points = match_df["Points"].sum()
-
-    ppm = (
-        total_points / total_matches
-        if total_matches > 0
-        else 0
-    )
-
-    win_rate = (
-        wins / total_matches * 100
-        if total_matches > 0
-        else 0
-    )
-
-    goal_difference = (
-        goals_for - goals_against
-    )
-
-    # ========================================================
-    # KPI CARDS
-    # ========================================================
-
-    st.subheader("📊 Arsenal Performance Overview")
-
-    c1, c2, c3, c4, c5 = st.columns(5)
-
-    c1.metric(
-        "Matches",
-        f"{total_matches:,}"
-    )
-
-    c2.metric(
-        "Wins",
-        f"{wins:,}"
-    )
-
-    c3.metric(
-        "Win Rate",
-        f"{win_rate:.1f}%"
-    )
-
-    c4.metric(
-        "Points / Match",
-        f"{ppm:.2f}"
-    )
-
-    c5.metric(
-        "Goal Difference",
-        f"{goal_difference:+,}"
-    )
-
-    st.divider()
-
-    # ========================================================
-    # DATASET OVERVIEW
-    # ========================================================
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-
-        st.subheader("📅 Seasons Covered")
-
-        seasons = sorted(
-            match_df["Season"]
-            .dropna()
-            .astype(str)
-            .unique()
-        )
-
-        st.write(
-            ", ".join(seasons)
-        )
-
-        st.subheader("📁 Data Assets")
-
-        st.write(
-            f"**Matches:** {len(match_df):,} records"
-        )
-
-        st.write(
-            f"**Player-match records:** "
-            f"{len(players_df):,} records"
-        )
-
-        st.write(
-            f"**Goalkeeper-match records:** "
-            f"{len(goalkeepers_df):,} records"
-        )
-
-    with col2:
-
-        st.subheader("🎯 Business Questions")
-
-        st.markdown(
-            """
-            **1. Season Performance**
-
-            How did Arsenal's performance change by season?
-
-            **2. Coach Performance**
-
-            How did Arsenal perform under different coaches?
-
-            **3. Opponent Performance**
-
-            Which opponents have Arsenal performed well
-            or poorly against?
-
-            **4. Player Contribution**
-
-            Which players made the greatest contribution
-            by position?
-
-            **5. Goalkeeper Performance**
-
-            Which goalkeepers performed best across
-            shot-stopping and distribution metrics?
-
-            **6. Coaching & Player Contribution**
-
-            How did player contribution change across
-            coaching periods?
-            """
-        )
-
-    st.divider()
-
-    # ========================================================
-    # DATASET SUMMARY
-    # ========================================================
-
-    st.subheader("📦 Dataset Summary")
-
-    summary_data = pd.DataFrame(
-        {
-            "Dataset": [
-                "Matches",
-                "Player Match Records",
-                "Goalkeeper Match Records",
-            ],
-            "Records": [
-                len(match_df),
-                len(players_df),
-                len(goalkeepers_df),
-            ],
-        }
-    )
-
-    st.dataframe(
-        summary_data,
-        hide_index=True,
-        use_container_width=True,
-    )
-
-    st.divider()
-
-    # ========================================================
-    # FOOTER
-    # ========================================================
-
-    st.caption(
-        "Arsenal FC Data Pipeline & Performance Analytics | "
-        "Football Analytics Case Study | "
-        "Created by Stephen Yaw Ayamah"
-    )
+match_df["GoalDifference"] = (
+    match_df["ArsenalScore"]
+    - match_df["OpponentScore"]
+)
 
 # ============================================================
-# RUN SELECTED PAGE
+# KPI CALCULATIONS
 # ============================================================
 
-pg.run()
+total_matches = len(match_df)
+
+wins = (
+    match_df["Result"] == "Win"
+).sum()
+
+draws = (
+    match_df["Result"] == "Draw"
+).sum()
+
+losses = (
+    match_df["Result"] == "Loss"
+).sum()
+
+goals_for = match_df["ArsenalScore"].sum()
+
+goals_against = match_df["OpponentScore"].sum()
+
+total_points = match_df["Points"].sum()
+
+ppm = (
+    total_points / total_matches
+    if total_matches > 0
+    else 0
+)
+
+win_rate = (
+    wins / total_matches * 100
+    if total_matches > 0
+    else 0
+)
+
+goal_difference = (
+    goals_for - goals_against
+)
+
+# ============================================================
+# KPI CARDS
+# ============================================================
+
+st.subheader("📊 Arsenal Performance Overview")
+
+c1, c2, c3, c4, c5 = st.columns(5)
+
+c1.metric(
+    "Matches",
+    f"{total_matches:,}"
+)
+
+c2.metric(
+    "Wins",
+    f"{wins:,}"
+)
+
+c3.metric(
+    "Win Rate",
+    f"{win_rate:.1f}%"
+)
+
+c4.metric(
+    "Points / Match",
+    f"{ppm:.2f}"
+)
+
+c5.metric(
+    "Goal Difference",
+    f"{goal_difference:+,}"
+)
+
+st.divider()
+
+# ============================================================
+# DATASET OVERVIEW
+# ============================================================
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    st.subheader("📅 Seasons Covered")
+
+    seasons = sorted(
+        match_df["Season"]
+        .dropna()
+        .astype(str)
+        .unique()
+    )
+
+    st.write(
+        ", ".join(seasons)
+    )
+
+    st.subheader("📁 Data Assets")
+
+    st.write(
+        f"**Matches:** {len(match_df):,} records"
+    )
+
+    st.write(
+        f"**Player-match records:** "
+        f"{len(players_df):,} records"
+    )
+
+    st.write(
+        f"**Goalkeeper-match records:** "
+        f"{len(goalkeepers_df):,} records"
+    )
+
+with col2:
+
+    st.subheader("🎯 Business Questions")
+
+    st.markdown(
+        """
+        **1. Season Performance**
+
+        How did Arsenal's performance change by season?
+
+        **2. Coach Performance**
+
+        How did Arsenal perform under different coaches?
+
+        **3. Opponent Performance**
+
+        Which opponents have Arsenal performed well
+        or poorly against?
+
+        **4. Player Contribution**
+
+        Which players made the greatest contribution
+        by position?
+
+        **5. Goalkeeper Performance**
+
+        Which goalkeepers performed best across
+        shot-stopping and distribution metrics?
+
+        **6. Coaching & Player Contribution**
+
+        How did player contribution change across
+        coaching periods?
+        """
+    )
+
+st.divider()
+
+# ============================================================
+# DATASET SUMMARY
+# ============================================================
+
+st.subheader("📦 Dataset Summary")
+
+summary_data = pd.DataFrame(
+    {
+        "Dataset": [
+            "Matches",
+            "Player Match Records",
+            "Goalkeeper Match Records",
+        ],
+        "Records": [
+            len(match_df),
+            len(players_df),
+            len(goalkeepers_df),
+        ],
+    }
+)
+
+st.dataframe(
+    summary_data,
+    hide_index=True,
+    use_container_width=True,
+)
+
+st.divider()
+
+# ============================================================
+# FOOTER
+# ============================================================
+
+st.caption(
+    "Arsenal FC Data Pipeline & Performance Analytics | "
+    "Football Analytics Case Study | "
+    "Created by Stephen Yaw Ayamah"
+)
