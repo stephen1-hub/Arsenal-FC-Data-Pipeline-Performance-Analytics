@@ -92,8 +92,6 @@ Compare player contribution during the Wenger, Emery and Arteta eras to investig
 ---
 
 # 🗂️ Project Structure
-
-Arsenal-FC-Data-Pipeline-Performance-Analytics/
 │
 ├── app45.py
 ├── matches.csv
