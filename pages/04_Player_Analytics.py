@@ -3,40 +3,51 @@ import pandas as pd
 import plotly.express as px
 from pathlib import Path
 
-
-# --------------------------------------------------
+# ============================================================
 # PAGE CONFIG
-# --------------------------------------------------
+# ============================================================
+
 st.set_page_config(
     page_title="Player Analytics",
     page_icon="👤",
     layout="wide"
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # DATA PATH
-# --------------------------------------------------
-DATA_DIR = Path(__file__).resolve().parents[2] / "data" / "raw"
+# ============================================================
 
+# This file is inside /pages
+# players.csv is located in the repository root
 
-# --------------------------------------------------
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR
+
+PLAYERS_FILE = DATA_DIR / "players.csv"
+
+# ============================================================
 # LOAD PLAYER DATA
-# --------------------------------------------------
+# ============================================================
+
 @st.cache_data
 def load_players():
 
-    players_df = pd.read_csv(
-        DATA_DIR / "players.csv"
-    )
+    players_df = pd.read_csv(PLAYERS_FILE)
 
-    # Convert date
-    players_df["Date"] = pd.to_datetime(
-        players_df["Date"],
-        errors="coerce"
-    )
+    # ========================================================
+    # DATE
+    # ========================================================
 
-    # Create full player name
+    if "Date" in players_df.columns:
+        players_df["Date"] = pd.to_datetime(
+            players_df["Date"],
+            errors="coerce"
+        )
+
+    # ========================================================
+    # PLAYER NAME
+    # ========================================================
+
     players_df["Player"] = (
         players_df["FirstName"]
         .fillna("")
@@ -49,7 +60,10 @@ def load_players():
         .str.strip()
     ).str.strip()
 
-    # Numeric columns
+    # ========================================================
+    # NUMERIC COLUMNS
+    # ========================================================
+
     numeric = [
         "Min",
         "G",
@@ -67,7 +81,9 @@ def load_players():
     ]
 
     for col in numeric:
+
         if col in players_df.columns:
+
             players_df[col] = pd.to_numeric(
                 players_df[col],
                 errors="coerce"
@@ -76,12 +92,16 @@ def load_players():
     return players_df
 
 
+# ============================================================
+# LOAD DATA
+# ============================================================
+
 players_df = load_players()
 
-
-# --------------------------------------------------
+# ============================================================
 # HEADER
-# --------------------------------------------------
+# ============================================================
+
 st.title("👤 Player Analytics")
 
 st.caption(
@@ -89,47 +109,56 @@ st.caption(
     "Which players made the greatest contribution by position?"
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # POSITION FILTER
-# --------------------------------------------------
-positions = (
-    ["All"]
-    + sorted(
+# ============================================================
+
+positions = ["All"]
+
+if "Pos" in players_df.columns:
+
+    positions += sorted(
         players_df["Pos"]
         .dropna()
+        .astype(str)
         .unique()
         .tolist()
     )
-)
 
 selected_pos = st.selectbox(
     "Position",
     positions
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # MINIMUM MINUTES FILTER
-# --------------------------------------------------
+# ============================================================
+
+max_minutes = int(
+    players_df["Min"].max()
+)
+
+default_minutes = min(
+    900,
+    max_minutes
+)
+
 min_minutes = st.slider(
     "Minimum minutes",
     min_value=0,
-    max_value=int(players_df["Min"].max()),
-    value=min(
-        900,
-        int(players_df["Min"].max())
-    ),
+    max_value=max_minutes,
+    value=default_minutes,
     step=90
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # FILTER PLAYER DATA
-# --------------------------------------------------
+# ============================================================
+
 filtered_players_df = players_df.copy()
 
 if selected_pos != "All":
+
     filtered_players_df = filtered_players_df[
         filtered_players_df["Pos"] == selected_pos
     ]
@@ -138,10 +167,23 @@ filtered_players_df = filtered_players_df[
     filtered_players_df["Min"] >= min_minutes
 ].copy()
 
+# ============================================================
+# CHECK FILTER RESULTS
+# ============================================================
 
-# --------------------------------------------------
+if filtered_players_df.empty:
+
+    st.warning(
+        "No players match the selected filters. "
+        "Try lowering the minimum minutes."
+    )
+
+    st.stop()
+
+# ============================================================
 # PLAYER AGGREGATION
-# --------------------------------------------------
+# ============================================================
+
 agg = (
     filtered_players_df
     .groupby(["Player", "Pos"])
@@ -162,10 +204,10 @@ agg = (
     .reset_index()
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # PER 90 METRICS
-# --------------------------------------------------
+# ============================================================
+
 per_90_metrics = [
     "Goals",
     "Assists",
@@ -182,8 +224,7 @@ for metric in per_90_metrics:
 
     agg[f"{metric}_Per_90"] = (
         agg[metric]
-        / agg["Minutes"]
-        .replace(0, pd.NA)
+        / agg["Minutes"].replace(0, pd.NA)
         * 90
     )
 
@@ -192,10 +233,10 @@ for metric in per_90_metrics:
         .fillna(0)
     )
 
-
-# --------------------------------------------------
+# ============================================================
 # RANKING METRIC
-# --------------------------------------------------
+# ============================================================
+
 sort_metric = st.selectbox(
     "Rank players by",
     [
@@ -210,19 +251,51 @@ sort_metric = st.selectbox(
     ]
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # PLAYER RANKING
-# --------------------------------------------------
-ranking = agg.sort_values(
-    sort_metric,
-    ascending=False
+# ============================================================
+
+ranking = (
+    agg
+    .sort_values(
+        sort_metric,
+        ascending=False
+    )
+    .reset_index(drop=True)
 )
 
+# ============================================================
+# KPI CARDS
+# ============================================================
 
-# --------------------------------------------------
-# PLAYER TABLE
-# --------------------------------------------------
+top_player = ranking.iloc[0]
+
+c1, c2, c3, c4 = st.columns(4)
+
+c1.metric(
+    "Top Player",
+    top_player["Player"]
+)
+
+c2.metric(
+    "Position",
+    top_player["Pos"]
+)
+
+c3.metric(
+    "Ranking Metric",
+    f"{top_player[sort_metric]:.2f}"
+)
+
+c4.metric(
+    "Minutes",
+    f"{top_player['Minutes']:,.0f}"
+)
+
+# ============================================================
+# PLAYER PERFORMANCE TABLE
+# ============================================================
+
 st.subheader("📊 Player Performance Ranking")
 
 display_columns = [
@@ -257,16 +330,17 @@ st.dataframe(
     use_container_width=True
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # TOP 10 PLAYERS
-# --------------------------------------------------
+# ============================================================
+
+st.subheader("🏆 Top 10 Players")
+
 top = (
     ranking
     .head(10)
     .sort_values(sort_metric)
 )
-
 
 fig = px.bar(
     top,
@@ -274,7 +348,7 @@ fig = px.bar(
     y="Player",
     color="Pos",
     orientation="h",
-    title=f"Top 10 Players — {sort_metric}"
+    title=f"Top 10 Players — {sort_metric.replace('_', ' ')}"
 )
 
 fig.update_layout(
@@ -287,103 +361,105 @@ st.plotly_chart(
     use_container_width=True
 )
 
-
-# --------------------------------------------------
+# ============================================================
 # PLAYER PROFILE
-# --------------------------------------------------
+# ============================================================
+
 st.subheader("🎯 Player Profile")
 
-if not ranking.empty:
+selected_player = st.selectbox(
+    "Select player",
+    ranking["Player"].tolist()
+)
 
-    selected_player = st.selectbox(
-        "Select player",
-        ranking["Player"].tolist()
-    )
+profile = ranking[
+    ranking["Player"] == selected_player
+].iloc[0]
 
-    profile = ranking[
-        ranking["Player"] == selected_player
-    ].iloc[0]
+# ============================================================
+# PLAYER KPIs
+# ============================================================
 
+c1, c2, c3, c4, c5 = st.columns(5)
 
-    # --------------------------------------------------
-    # PLAYER KPIs
-    # --------------------------------------------------
-    c1, c2, c3, c4, c5 = st.columns(5)
+c1.metric(
+    "Minutes",
+    f"{profile['Minutes']:,.0f}"
+)
 
-    c1.metric(
-        "Minutes",
-        f"{profile['Minutes']:,.0f}"
-    )
+c2.metric(
+    "Goals",
+    f"{profile['Goals']:.0f}"
+)
 
-    c2.metric(
-        "Goals",
-        f"{profile['Goals']:.0f}"
-    )
+c3.metric(
+    "Assists",
+    f"{profile['Assists']:.0f}"
+)
 
-    c3.metric(
-        "Assists",
-        f"{profile['Assists']:.0f}"
-    )
+c4.metric(
+    "Goals / 90",
+    f"{profile['Goals_Per_90']:.2f}"
+)
 
-    c4.metric(
-        "Goals / 90",
-        f"{profile['Goals_Per_90']:.2f}"
-    )
+c5.metric(
+    "xG / 90",
+    f"{profile['xG_Per_90']:.2f}"
+)
 
-    c5.metric(
-        "xG / 90",
-        f"{profile['xG_Per_90']:.2f}"
-    )
+# ============================================================
+# PERFORMANCE PROFILE
+# ============================================================
 
+metrics = pd.DataFrame({
+    "Metric": [
+        "Goals/90",
+        "Assists/90",
+        "xG/90",
+        "xAG/90",
+        "Progressive Passes/90",
+        "Progressive Carries/90",
+        "Tackles/90",
+        "Interceptions/90"
+    ],
 
-    # --------------------------------------------------
-    # PERFORMANCE PROFILE
-    # --------------------------------------------------
-    metrics = pd.DataFrame({
-        "Metric": [
-            "Goals/90",
-            "Assists/90",
-            "xG/90",
-            "xAG/90",
-            "Progressive Passes/90",
-            "Progressive Carries/90",
-            "Tackles/90",
-            "Interceptions/90"
-        ],
+    "Value": [
+        profile["Goals_Per_90"],
+        profile["Assists_Per_90"],
+        profile["xG_Per_90"],
+        profile["xAG_Per_90"],
+        profile["Progressive_Passes_Per_90"],
+        profile["Progressive_Carries_Per_90"],
+        profile["Tackles_Per_90"],
+        profile["Interceptions_Per_90"]
+    ]
+})
 
-        "Value": [
-            profile["Goals_Per_90"],
-            profile["Assists_Per_90"],
-            profile["xG_Per_90"],
-            profile["xAG_Per_90"],
-            profile["Progressive_Passes_Per_90"],
-            profile["Progressive_Carries_Per_90"],
-            profile["Tackles_Per_90"],
-            profile["Interceptions_Per_90"]
-        ]
-    })
+fig = px.bar(
+    metrics,
+    x="Value",
+    y="Metric",
+    orientation="h",
+    title=f"{selected_player} — Performance Profile"
+)
 
+fig.update_layout(
+    xaxis_title="Per 90",
+    yaxis_title=""
+)
 
-    fig = px.bar(
-        metrics,
-        x="Value",
-        y="Metric",
-        orientation="h",
-        title=f"{selected_player} — Performance Profile"
-    )
+st.plotly_chart(
+    fig,
+    use_container_width=True
+)
 
-    fig.update_layout(
-        xaxis_title="Per 90",
-        yaxis_title=""
-    )
+# ============================================================
+# ANALYTICAL NOTE
+# ============================================================
 
-    st.plotly_chart(
-        fig,
-        use_container_width=True
-    )
-
-else:
-
-    st.warning(
-        "No players match the selected filters."
-    )
+st.info(
+    "Player comparisons should be interpreted alongside playing "
+    "position, minutes played, tactical role and sample size. "
+    "Per-90 metrics are useful for comparison but should not be "
+    "viewed independently of total contribution."
+)
