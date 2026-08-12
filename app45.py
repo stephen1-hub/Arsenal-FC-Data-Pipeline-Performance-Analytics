@@ -72,26 +72,32 @@ match_df, players_df, goalkeepers_df = load_data()
 
 
 # ============================================================
-# SIDEBAR NAVIGATION
+# SIDEBAR
 # ============================================================
 
 st.sidebar.title("⚽ Arsenal FC Analytics")
-st.sidebar.caption("2017/18 – 2022/23")
+
+st.sidebar.caption(
+    "2017/18 – 2022/23"
+)
 
 st.sidebar.divider()
 
-page = st.sidebar.radio(
-    "Navigate to:",
-    [
-        "🏠 Overview",
-        "📅 Season Performance",
-        "🧑‍💼 Coach Analysis",
-        "🏟️ Opponent Analysis",
-        "👤 Player Analytics",
-        "🧤 Goalkeeper Analytics",
-        "🔄 Coaching Eras",
-    ]
+st.sidebar.markdown(
+    """
+    ### 📊 Dashboard
+
+    Use the navigation menu above to explore:
+
+    - Season Performance
+    - Coach Analysis
+    - Opponent Analysis
+    - Player Analytics
+    - Goalkeeper Analytics
+    - Coaching Eras
+    """
 )
+
 
 # ============================================================
 # PAGE HEADER
@@ -115,8 +121,9 @@ st.markdown(
 # ============================================================
 
 st.info(
-    "Use the pages in the sidebar to explore the six analytical "
-    "sections. The 2022/23 season is incomplete in the available dataset."
+    "The dashboard covers Arsenal's performance from 2017/18 "
+    "to 2022/23. The 2022/23 season is incomplete in the "
+    "available dataset."
 )
 
 
@@ -258,9 +265,9 @@ st.divider()
 col1, col2 = st.columns(2)
 
 
-# ------------------------------------------------------------
-# SEASONS & DATASETS
-# ------------------------------------------------------------
+# ============================================================
+# SEASONS AND DATA ASSETS
+# ============================================================
 
 with col1:
 
@@ -292,9 +299,9 @@ with col1:
     )
 
 
-# ------------------------------------------------------------
+# ============================================================
 # BUSINESS QUESTIONS
-# ------------------------------------------------------------
+# ============================================================
 
 with col2:
 
@@ -302,23 +309,29 @@ with col2:
 
     st.markdown(
         """
-        **1. Season Performance**  
+        **1. Season Performance**
+
         How did Arsenal's performance change by season?
 
-        **2. Coach Performance**  
+        **2. Coach Performance**
+
         How did Arsenal perform under different coaches?
 
-        **3. Opponent Performance**  
+        **3. Opponent Performance**
+
         Which opponents have Arsenal performed well or poorly against?
 
-        **4. Player Contribution**  
+        **4. Player Contribution**
+
         Which players made the greatest contribution by position?
 
-        **5. Goalkeeper Performance**  
+        **5. Goalkeeper Performance**
+
         Which goalkeepers performed best across shot-stopping
         and distribution metrics?
 
-        **6. Coaching & Player Contribution**  
+        **6. Coaching & Player Contribution**
+
         How did player contribution change across coaching periods?
         """
     )
@@ -335,12 +348,12 @@ st.subheader("🚀 Dashboard Guide")
 
 st.markdown(
     """
-    Use the pages in the sidebar to move through the analysis:
+    The dashboard follows this analytical flow:
 
     **Team Performance → Coaching → Opponents → Players → Goalkeepers → Coaching Eras**
 
-    The dashboard is designed as a football analytics case study,
-    with emphasis on **decision-ready metrics rather than isolated statistics**.
+    Each section focuses on decision-ready football metrics
+    rather than isolated statistics.
     """
 )
 
@@ -409,5 +422,5 @@ st.divider()
 
 st.caption(
     "Arsenal FC Data Pipeline & Performance Analytics | "
-    "Football Analytics Case Study"
+    "Football Analytics Case Study | " Created by Stephen Yaw Ayamah"
 )
